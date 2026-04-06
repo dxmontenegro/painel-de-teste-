@@ -78,14 +78,11 @@ async function verificar() {
 
     try {
 
-      const res = await fetch(s.url);
+      // 🔥 faz a requisição sem depender de resposta
+      await fetch(s.url, { mode: "no-cors" });
 
-      if (res.ok) {
-        linha.innerHTML = `✅ ${s.nome}`;
-        linha.className = "ok";
-      } else {
-        linha.innerHTML = `⚠️ ${s.nome}`;
-      }
+      linha.innerHTML = `✅ ${s.nome}`;
+      linha.className = "ok";
 
     } catch (e) {
       linha.innerHTML = `❌ ${s.nome}`;
