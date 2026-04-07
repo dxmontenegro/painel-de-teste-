@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Sistemas</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 15px;
+}
+
+.container {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 500px;
+  margin: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  background: #059669;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.status {
+  margin-top: 20px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: #f9fafb;
+  font-size: 15px;
+}
+
+.ok {
+  color: #059669;
+  font-weight: bold;
+}
+
+.err {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+.loading {
+  color: #6b7280;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>🚀 Sistemas</h2>
+
+  <button onclick="verificar()">🔄 Verificar</button>
+
+  <div id="status" class="status"></div>
+</div>
+
+<script>
+
+const sistemas = [
+  { nome: "Conselho", url: "https://conselho2026.vercel.app/api/ping" },
+  { nome: "Banco GOV", url: "https://eemtidragaodomarcofre.vercel.app/api/ping" },
+  { nome: "Ocorrências", url: "https://ocorrencias-tau.vercel.app/api/ping" },
+  { nome: "EletiFAS", url: "https://eletifas.vercel.app/api/ping" },
+  { nome: "Atividades", url: "https://helpatividadesddmar.vercel.app/api/ping" },
+  { nome: "Multimeios", url: "https://multimeios-six.vercel.app/api/ping" },
+  { nome: "Reservas", url: "https://reservaprojetores.vercel.app/api/ping" }
+];
+
+async function verificar() {
+
+  const status = document.getElementById("status");
+  status.innerHTML = "";
+
+  for (let s of sistemas) {
+
+    const linha = document.createElement("div");
+    linha.className = "item loading";
+    linha.innerHTML = `<span>${s.nome}</span><span>⏳</span>`;
+    status.appendChild(linha);
+
+    try {
+
+      const res = await fetch(s.url);
+
+      if (res.ok) {
+        linha.className = "item ok";
+        linha.innerHTML = `<span>${s.nome}</span><span>✅</span>`;
+      } else {
+        linha.className = "item err";
+        linha.innerHTML = `<span>${s.nome}</span><span>⚠️</span>`;
+      }
+
+    } catch (e) {
+      linha.className = "item err";
+      linha.innerHTML = `<span>${s.nome}</span><span>❌</span>`;
+    }
+  }
+}
+
+</script>
+
+</body>
+</html>
