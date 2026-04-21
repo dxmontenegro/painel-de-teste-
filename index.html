@@ -20,7 +20,6 @@ body {
   background: #111827;
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 0 25px rgba(0,0,0,0.5);
 }
 
 h2 { text-align: center; }
@@ -40,7 +39,6 @@ button {
 .item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 12px;
   margin-top: 10px;
   border-radius: 10px;
@@ -50,22 +48,6 @@ button {
 .ok { color: #10b981; }
 .err { color: #ef4444; }
 .loading { color: #9ca3af; }
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
-.green { background: #10b981; }
-.red { background: #ef4444; }
-.gray { background: #6b7280; }
-
-.row {
-  display: flex;
-  align-items: center;
-}
 </style>
 </head>
 
@@ -98,43 +80,29 @@ async function verificar() {
 
     const div = document.createElement("div");
     div.className = "item loading";
-    div.innerHTML = `
-      <div class="row">
-        <div class="dot gray"></div>
-        <span>${s.nome}</span>
-      </div>
-      <span>⏳</span>
-    `;
+    div.innerHTML = `<span>${s.nome}</span><span>⏳</span>`;
     lista.appendChild(div);
 
     const inicio = Date.now();
 
     try {
 
-      await fetch(s.url, { mode: "no-cors" });
-
+      const res = await fetch(s.url);
       const tempo = Date.now() - inicio;
 
-      div.className = "item ok";
-      div.innerHTML = `
-        <div class="row">
-          <div class="dot green"></div>
-          <span>${s.nome}</span>
-        </div>
-        <span>ONLINE • ${tempo}ms</span>
-      `;
+      const data = await res.json();
 
-    } catch {
+      if (res.ok && data.status === "ok") {
+        div.className = "item ok";
+        div.innerHTML = `<span>${s.nome}</span><span>✅ ${tempo}ms</span>`;
+      } else {
+        div.className = "item err";
+        div.innerHTML = `<span>${s.nome}</span><span>⚠️</span>`;
+      }
 
+    } catch (e) {
       div.className = "item err";
-      div.innerHTML = `
-        <div class="row">
-          <div class="dot red"></div>
-          <span>${s.nome}</span>
-        </div>
-        <span>OFFLINE</span>
-      `;
-
+      div.innerHTML = `<span>${s.nome}</span><span>❌</span>`;
     }
 
   });
