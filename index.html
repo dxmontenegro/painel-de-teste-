@@ -7,57 +7,73 @@
 
 <style>
 body {
-  font-family: Arial;
-  background: #f5f7fa;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
   margin: 0;
-  padding: 15px;
+  padding: 20px;
 }
 
 .container {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  max-width: 500px;
+  max-width: 600px;
   margin: auto;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: #111827;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.5);
 }
 
-h2 {
-  text-align: center;
-}
+h2 { text-align: center; }
 
 button {
   width: 100%;
-  padding: 12px;
-  background: #059669;
-  color: white;
+  padding: 14px;
+  background: linear-gradient(135deg, #059669, #10b981);
   border: none;
-  border-radius: 8px;
-  margin-top: 10px;
-  cursor: pointer;
+  border-radius: 10px;
+  color: white;
   font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 15px;
 }
 
 .item {
   display: flex;
   justify-content: space-between;
-  padding: 10px;
-  margin-top: 8px;
-  border-radius: 8px;
-  background: #f9fafb;
+  align-items: center;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  background: #1f2937;
 }
 
-.ok { color: #059669; font-weight: bold; }
-.err { color: #dc2626; font-weight: bold; }
-.loading { color: #6b7280; }
+.ok { color: #10b981; }
+.err { color: #ef4444; }
+.loading { color: #9ca3af; }
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.green { background: #10b981; }
+.red { background: #ef4444; }
+.gray { background: #6b7280; }
+
+.row {
+  display: flex;
+  align-items: center;
+}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-  <h2>🚀 Sistemas</h2>
-  <button onclick="verificar()">🔄 Verificar</button>
+  <h2>🚀 Painel de Sistemas</h2>
+  <button onclick="verificar()">🔄 Atualizar</button>
   <div id="lista"></div>
 </div>
 
@@ -82,35 +98,43 @@ async function verificar() {
 
     const div = document.createElement("div");
     div.className = "item loading";
-    div.innerHTML = `<span>${s.nome}</span><span>⏳</span>`;
+    div.innerHTML = `
+      <div class="row">
+        <div class="dot gray"></div>
+        <span>${s.nome}</span>
+      </div>
+      <span>⏳</span>
+    `;
     lista.appendChild(div);
 
     const inicio = Date.now();
 
     try {
 
-      const res = await fetch(s.url);
+      await fetch(s.url, { mode: "no-cors" });
+
       const tempo = Date.now() - inicio;
 
-      let data = null;
+      div.className = "item ok";
+      div.innerHTML = `
+        <div class="row">
+          <div class="dot green"></div>
+          <span>${s.nome}</span>
+        </div>
+        <span>ONLINE • ${tempo}ms</span>
+      `;
 
-      try {
-        data = await res.json();
-      } catch {
-        data = null;
-      }
+    } catch {
 
-      if (res.ok && data && data.status === "ok") {
-        div.className = "item ok";
-        div.innerHTML = `<span>${s.nome}</span><span>✅ ${tempo}ms</span>`;
-      } else {
-        div.className = "item err";
-        div.innerHTML = `<span>${s.nome}</span><span>⚠️</span>`;
-      }
-
-    } catch (e) {
       div.className = "item err";
-      div.innerHTML = `<span>${s.nome}</span><span>❌</span>`;
+      div.innerHTML = `
+        <div class="row">
+          <div class="dot red"></div>
+          <span>${s.nome}</span>
+        </div>
+        <span>OFFLINE</span>
+      `;
+
     }
 
   });
@@ -118,10 +142,7 @@ async function verificar() {
   await Promise.all(promessas);
 }
 
-// roda ao abrir
 window.onload = verificar;
-
-// roda a cada 10 minutos
 setInterval(verificar, 10 * 60 * 1000);
 
 </script>
