@@ -92,7 +92,15 @@ async function verificar() {
       const res = await fetch(s.url);
       const tempo = Date.now() - inicio;
 
-      if (res.ok) {
+      let data = null;
+
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
+
+      if (res.ok && data && data.status === "ok") {
         div.className = "item ok";
         div.innerHTML = `<span>${s.nome}</span><span>✅ ${tempo}ms</span>`;
       } else {
@@ -100,7 +108,7 @@ async function verificar() {
         div.innerHTML = `<span>${s.nome}</span><span>⚠️</span>`;
       }
 
-    } catch {
+    } catch (e) {
       div.className = "item err";
       div.innerHTML = `<span>${s.nome}</span><span>❌</span>`;
     }
@@ -113,7 +121,7 @@ async function verificar() {
 // roda ao abrir
 window.onload = verificar;
 
-// roda a cada 10 minutos (mantém ativo)
+// roda a cada 10 minutos
 setInterval(verificar, 10 * 60 * 1000);
 
 </script>
