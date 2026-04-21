@@ -24,7 +24,14 @@ body {
 
 h2 {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+}
+
+.info {
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 15px;
 }
 
 button {
@@ -54,19 +61,10 @@ button {
   font-size: 15px;
 }
 
-.ok {
-  color: #059669;
-  font-weight: bold;
-}
-
-.err {
-  color: #dc2626;
-  font-weight: bold;
-}
-
-.loading {
-  color: #6b7280;
-}
+.ok { color: #059669; font-weight: bold; }
+.warn { color: #f59e0b; font-weight: bold; }
+.err { color: #dc2626; font-weight: bold; }
+.loading { color: #6b7280; }
 
 </style>
 </head>
@@ -75,8 +73,9 @@ button {
 
 <div class="container">
   <h2>🚀 Sistemas</h2>
+  <div class="info">Atualiza automaticamente a cada 10 minutos</div>
 
-  <button onclick="verificar()">🔄 Verificar</button>
+  <button onclick="verificar()">🔄 Verificar agora</button>
 
   <div id="status" class="status"></div>
 </div>
@@ -98,31 +97,59 @@ async function verificar() {
   const status = document.getElementById("status");
   status.innerHTML = "";
 
-  for (let s of sistemas) {
+  const promessas = sistemas.map(async (s) => {
 
     const linha = document.createElement("div");
     linha.className = "item loading";
-    linha.innerHTML = `<span>${s.nome}</span><span>⏳</span>`;
+    linha.innerHTML = `<span>${s.nome}</span><span>⏳ Testando...</span>`;
     status.appendChild(linha);
+
+    const inicio = Date.now();
 
     try {
 
-      const res = await fetch(s.url);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+
+      const res = await fetch(s.url, { signal: controller.signal });
+
+      clearTimeout(timeout);
+
+      const tempo = Date.now() - inicio;
 
       if (res.ok) {
-        linha.className = "item ok";
-        linha.innerHTML = `<span>${s.nome}</span><span>✅</span>`;
+
+        let classe = "ok";
+        let emoji = "🟢";
+
+        if (tempo > 2000) {
+          classe = "warn";
+          emoji = "🟡";
+        }
+
+        linha.className = "item " + classe;
+        linha.innerHTML = `<span>${s.nome}</span><span>${emoji} ${tempo}ms</span>`;
+
       } else {
         linha.className = "item err";
-        linha.innerHTML = `<span>${s.nome}</span><span>⚠️</span>`;
+        linha.innerHTML = `<span>${s.nome}</span><span>⚠️ erro</span>`;
       }
 
     } catch (e) {
       linha.className = "item err";
-      linha.innerHTML = `<span>${s.nome}</span><span>❌</span>`;
+      linha.innerHTML = `<span>${s.nome}</span><span>❌ offline</span>`;
     }
-  }
+
+  });
+
+  await Promise.all(promessas);
 }
+
+// roda ao abrir
+window.onload = verificar;
+
+// roda a cada 10 minutos
+setInterval(verificar, 10 * 60 * 1000);
 
 </script>
 
